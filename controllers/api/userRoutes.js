@@ -27,3 +27,45 @@ router.get('/', (req, res) => {
         res.status(500).json(err);
       });
   });
+
+  // GET /api/users -- get a single user by id
+router.get('/:id', (req, res) => {
+    // access the User model and run the findOne() method to get a single user
+    User.findOne({
+      // when data is sent back, exclude the password
+      attributes: { exclude: ['password'] },
+      where: {
+        // use id as the parameter for the request
+        id: req.params.id
+      },
+      // include the posts the user has created, and the posts the user has commented on
+      include: [
+        {
+          model: Post,
+          attributes: ['id', 'title', 'post_text', 'created_at']
+        },
+        {
+            model: Comment,
+            attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+            include: {
+                model: Post,
+                attributes: ['title']
+            }
+        }
+      ]
+    })
+      .then(dbUserData => {
+        if (!dbUserData) {
+          // if no user is found, return error
+          res.status(404).json({ message: 'No user found with this id' });
+          return;
+        }
+        // otherwise, return data for the requested user
+        res.json(dbUserData);
+      })
+      .catch(err => {
+        // if there is a server error, return that error
+        console.log(err);
+        res.status(500).json(err);
+      });
+  });
