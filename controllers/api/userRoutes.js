@@ -92,4 +92,36 @@ router.post('/', (req, res) => {
         console.log(err);
         res.status(500).json(err);
       });
-  });  
+  });
+  
+  // POST /api/users/login -- login route for a user
+router.post('/login',  (req, res) => {
+    User.findOne({
+        where: {
+        email: req.body.email
+        }
+    }).then(dbUserData => {
+        // if email is not found, return an error
+        if (!dbUserData) {
+        res.status(400).json({ message: 'No user with that email address!' });
+        return;
+        }
+        // Otherwise, verify the user.
+        // call instance method as defined in the User model
+        const validPassword = dbUserData.checkPassword(req.body.password);
+        // if the password is invalid (method returns false), return an error
+        if (!validPassword) {
+            res.status(400).json({ message: 'Incorrect password!' });
+            return;
+        }
+        // otherwise, save the session, and return the user object and a success message
+        req.session.save(() => {
+          // declare session variables
+          req.session.user_id = dbUserData.id;
+          req.session.username = dbUserData.username;
+          req.session.loggedIn = true;
+    
+          res.json({ user: dbUserData, message: 'You are now logged in!' });
+        });
+    });  
+});
