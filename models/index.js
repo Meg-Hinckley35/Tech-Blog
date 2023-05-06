@@ -1,7 +1,7 @@
 // User model
 const User = require('./User');
 // Post model
-const Post = require('./Post');
+const Post = require('./Post.js');
 // Comment model
 const Comment = require('./Comment');
 
