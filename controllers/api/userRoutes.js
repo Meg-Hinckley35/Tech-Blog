@@ -139,7 +139,7 @@ router.post('/logout', withAuth, (req, res) => {
     }
   })
 
-  // PUT /api/users/1 -- update an existing user
+  // PUT /api/users -- update an existing user
 router.put('/:id', withAuth, (req, res) => {
     // allowing for updating only key/value pairs that are passed through
     User.update(req.body, {
@@ -162,3 +162,26 @@ router.put('/:id', withAuth, (req, res) => {
         res.status(500).json(err);
       });
   })
+
+  // DELETE /api/users -- delete an existing user
+router.delete('/:id', withAuth, (req, res) => {
+    // destroy method
+    User.destroy({
+      where: {
+        id: req.params.id
+      }
+    })
+      .then(dbUserData => {
+        if (!dbUserData) {
+          res.status(404).json({ message: 'No user found with this id' });
+          return;
+        }
+        res.json(dbUserData);
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+      });
+  });
+
+module.exports = router;
