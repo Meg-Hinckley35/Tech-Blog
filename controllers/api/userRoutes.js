@@ -125,3 +125,16 @@ router.post('/login',  (req, res) => {
         });
     });  
 });
+
+// POST /api/users/logout -- log out an existing user
+router.post('/logout', withAuth, (req, res) => {
+    if (req.session.loggedIn) {
+      req.session.destroy(() => {
+        // 204 status is that a request has succeeded
+        res.status(204).end();
+      });
+    } else {
+      // if there is no session, then the logout request will send back a no resource found status
+      res.status(404).end();
+    }
+  })
