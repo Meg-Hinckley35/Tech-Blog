@@ -138,3 +138,27 @@ router.post('/logout', withAuth, (req, res) => {
       res.status(404).end();
     }
   })
+
+  // PUT /api/users/1 -- update an existing user
+router.put('/:id', withAuth, (req, res) => {
+    // allowing for updating only key/value pairs that are passed through
+    User.update(req.body, {
+        // hook to hash only the password
+        individualHooks: true,
+        // use the id as the parameter for user to be updated
+        where: {
+            id: req.params.id
+        }
+    })
+      .then(dbUserData => {
+        if (!dbUserData[0]) {
+          res.status(404).json({ message: 'No user found with this id' });
+          return;
+        }
+        res.json(dbUserData);
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).json(err);
+      });
+  })
