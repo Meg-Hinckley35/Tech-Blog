@@ -18,3 +18,21 @@ router.get('/', (req, res) => {
         res.status(500).json(err);
       });
   });
+
+  // POST a new comment
+router.post('/', withAuth, (req, res) => {
+    // if session exists, create a comment
+    if (req.session) {
+      Comment.create({
+        comment_text: req.body.comment_text,
+        post_id: req.body.post_id,
+        // use the user id from the session
+        user_id: req.session.user_id
+      })
+        .then(dbCommentData => res.json(dbCommentData))
+        .catch(err => {
+          console.log(err);
+          res.status(400).json(err);
+        });
+    }
+  });
