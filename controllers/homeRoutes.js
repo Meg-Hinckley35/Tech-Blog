@@ -47,3 +47,53 @@ router.get('/', (req, res) => {
       res.status(500).json(err);
   });
 });
+
+// get single post
+router.get('/post/:id', (req, res) => {
+    Post.findOne({
+      where: {
+        // specify the post id parameter in the query
+        id: req.params.id
+      },
+      // Query configuration
+      attributes: [
+        'id',
+        'post_text',
+        'title',
+        'created_at',
+      ],
+      include: [
+        {
+          model: User,
+          attributes: ['username']
+        },
+        {
+            model: Comment,
+            attributes: ['id', 'comment_text', 'post_id', 'user_id', 'created_at'],
+            include: {
+                model: User,
+                attributes: ['username']
+            }
+        }
+      ]
+    })
+    .then(dbPostData => {
+        // if no post by that id exists, return an error
+        if (!dbPostData) {
+          res.status(404).json({ message: 'No post found with this id' });
+          return;
+        }
+        // serialize the post data
+        const post = dbPostData.get({ plain: true });
+        // pass the posts and a session variable into the single post template
+        res.render('single-post', {
+            post,
+            loggedIn: req.session.loggedIn
+          });
+      })
+      .catch(err => {
+        // if error occurred, return an error
+        console.log(err);
+        res.status(500).json(err);
+      });
+  });
